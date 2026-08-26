@@ -240,7 +240,7 @@ def _render_group(frame: pd.DataFrame, date_column: str, group: str, candidates:
             column_config={
                 "Current": st.column_config.NumberColumn(format="localized"),
                 "Previous": st.column_config.NumberColumn(format="localized"),
-                "Change": st.column_config.ProgressColumn(format="percent", min_value=-1, max_value=1),
+                "Change": st.column_config.NumberColumn(format="percent"),
             },
         )
 
