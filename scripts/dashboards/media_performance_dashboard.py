@@ -232,8 +232,16 @@ def main() -> None:
         """
         <style>
         .block-container {padding-top: 1.4rem; max-width: 1500px;}
-        [data-testid="stMetric"] {background: #f7f9fc; border: 1px solid #e5eaf2; border-radius: 12px; padding: 16px;}
+        [data-testid="stMetric"] {
+            background: rgba(128, 128, 128, 0.09);
+            border: 1px solid rgba(128, 128, 128, 0.22);
+            border-radius: 12px;
+            padding: 16px;
+            color: inherit;
+        }
         [data-testid="stMetricLabel"] {font-weight: 700;}
+        [data-testid="stMetricLabel"] p,
+        [data-testid="stMetricValue"] {color: inherit;}
         </style>
         """,
         unsafe_allow_html=True,
@@ -244,13 +252,12 @@ def main() -> None:
     with st.sidebar:
         st.header("Dashboard controls")
         cadence = st.radio("Reporting cadence", list(CADENCE_TABS), horizontal=True)
-        config_path = st.text_input("Scorecard config", str(DEFAULT_CONFIG))
         if st.button("Refresh Google Sheet", type="primary", use_container_width=True):
             load_scorecard.clear()
 
     try:
         with st.spinner("Loading the Google Scorecard…"):
-            datasets = load_scorecard(config_path)
+            datasets = load_scorecard(str(DEFAULT_CONFIG))
     except Exception as error:  # noqa: BLE001
         st.error(f"Could not load the Google Scorecard: {error}")
         st.info("Confirm the service-account JSON exists and that its email address has Viewer access to the sheet.")
@@ -323,7 +330,7 @@ def main() -> None:
         q1.metric("Periods in view", f"{len(frame):,}")
         q2.metric("Metrics populated", f"{len(available):,}")
         q3.metric("Overall completeness", f"{frame[available].notna().mean().mean():.1%}")
-        quality_frame = populated.rename("Completeness").reset_index(names="Metric")
+        quality_frame = populated.rename_axis("Metric").reset_index(name="Completeness")
         st.dataframe(
             quality_frame,
             hide_index=True,
