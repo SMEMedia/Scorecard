@@ -58,6 +58,32 @@ DEFAULT_KPIS = {
     "Weekly": ["AM Users", "AM Sessions", "AM Page Views", "Podcast Total", "Emails Delivered", "New IOs (Revenue)"],
 }
 
+SOCIAL_FOLLOWER_METRICS = [
+    "Facebook Followers",
+    "YouTube Subscribers",
+    "LinkedIn Followers",
+    "X Followers",
+    "Instagram Followers",
+    "Threads Followers",
+]
+
+LINKEDIN_PERFORMANCE_METRICS = [
+    "LinkedIn Impressions (Organic)",
+    "LinkedIn Impressions (Paid)",
+    "LinkedIn Reach",
+    "LinkedIn Clicks (Oragnic)",
+    "LinkedIn Clicks (Paid)",
+    "LinkedIn Reactions (Organic)",
+    "LinkedIn Reactions (Paid)",
+    "LinkenIn Comments (Organic)",
+    "LinkenIn Comments (Paid)",
+    "LinkedIn Reposts (Organic)",
+    "LinkedIn Reposts (Paid)",
+    "LinkedIn Engagement Rate (Organic)",
+    "LinkedIn Engagement Rate (Paid)",
+    "LinkedIn Posts",
+]
+
 
 def _secret(name: str, default: Any = None) -> Any:
     try:
@@ -293,8 +319,8 @@ def main() -> None:
         kpis = st.multiselect("Headline KPIs (up to 6)", available, default=defaults, max_selections=6)
         st.caption(f"Latest data: {_period_label(cadence, frame[date_column].max())}")
 
-    overview, channels, detail, engagement, quality = st.tabs(
-        ["Executive overview", "Channel performance", "Media detail", "Engagement", "Data quality"]
+    overview, channels, social, detail, engagement, quality = st.tabs(
+        ["Executive overview", "Channel performance", "Social media", "Media detail", "Engagement", "Data quality"]
     )
     with overview:
         latest_period = frame[date_column].iloc[-1]
@@ -322,6 +348,53 @@ def main() -> None:
         group_names = [name for name, metrics in METRIC_GROUPS.items() if any(metric in available for metric in metrics)]
         selected_group = st.segmented_control("Performance area", group_names, default=group_names[0])
         _render_group(frame, date_column, selected_group, METRIC_GROUPS[selected_group])
+
+    with social:
+        monthly_social = datasets["Monthly Media Data"].copy()
+        social_date_column = monthly_social.columns[0]
+        monthly_social = monthly_social[
+            monthly_social[social_date_column].dt.date.between(start_date, end_date)
+        ]
+        if monthly_social.empty:
+            st.info("No monthly social-media periods fall inside the selected date range.")
+        else:
+            follower_metrics = [
+                metric
+                for metric in SOCIAL_FOLLOWER_METRICS
+                if metric in monthly_social and monthly_social[metric].notna().any()
+            ]
+            st.subheader(_period_label("Monthly", monthly_social[social_date_column].iloc[-1]))
+            st.caption("Social audience totals and month-over-month changes across owned platforms.")
+            if follower_metrics:
+                _render_kpis(monthly_social, follower_metrics)
+                st.subheader("Follower trends")
+                st.altair_chart(
+                    _trend_chart(monthly_social, social_date_column, follower_metrics),
+                    use_container_width=True,
+                )
+            else:
+                st.info("No social follower metrics are populated for this date range.")
+
+            linkedin = datasets["Monthly Media Detail"].copy()
+            linkedin_date_column = linkedin.columns[0]
+            linkedin = linkedin[
+                linkedin[linkedin_date_column].dt.date.between(start_date, end_date)
+            ]
+            linkedin_metrics = [
+                metric
+                for metric in LINKEDIN_PERFORMANCE_METRICS
+                if metric in linkedin and linkedin[metric].notna().any()
+            ]
+            st.subheader("LinkedIn performance")
+            if linkedin.empty or not linkedin_metrics:
+                st.info("No LinkedIn performance metrics are populated for this date range.")
+            else:
+                _render_group(
+                    linkedin,
+                    linkedin_date_column,
+                    "LinkedIn",
+                    linkedin_metrics,
+                )
 
     with detail:
         if cadence == "Monthly":
