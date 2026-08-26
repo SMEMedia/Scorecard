@@ -150,6 +150,13 @@ def _delta(current: float | None, previous: float | None) -> str | None:
     return f"{(current / previous - 1):+.1%} vs prior period"
 
 
+def _period_label(cadence: str, value: Any) -> str:
+    period = pd.Timestamp(value)
+    if cadence == "Weekly":
+        return f"Week ending {period:%B} {period.day}, {period.year}"
+    return f"Month of {period:%B %Y}"
+
+
 def _available_metrics(frame: pd.DataFrame) -> list[str]:
     return [column for column in frame.columns[1:] if frame[column].notna().any()]
 
@@ -285,12 +292,17 @@ def main() -> None:
     defaults = [metric for metric in DEFAULT_KPIS[cadence] if metric in available][:6]
     with st.sidebar:
         kpis = st.multiselect("Headline KPIs (up to 6)", available, default=defaults, max_selections=6)
-        st.caption(f"Latest populated period: {frame[date_column].max():%b %d, %Y}")
+        st.caption(f"Latest data: {_period_label(cadence, frame[date_column].max())}")
 
     overview, channels, detail, engagement, quality = st.tabs(
         ["Executive overview", "Channel performance", "Media detail", "Engagement", "Data quality"]
     )
     with overview:
+        latest_period = frame[date_column].iloc[-1]
+        st.subheader(_period_label(cadence, latest_period))
+        if len(frame) > 1:
+            previous_period = frame[date_column].iloc[-2]
+            st.caption(f"Changes shown against {_period_label(cadence, previous_period).lower()}.")
         if kpis:
             _render_kpis(frame, kpis)
         st.subheader("Performance trends")
