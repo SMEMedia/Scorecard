@@ -173,7 +173,6 @@ def _trend_chart(frame: pd.DataFrame, date_column: str, metrics: list[str]) -> a
             tooltip=[alt.Tooltip(f"{date_column}:T", title="Period"), "Metric:N", alt.Tooltip("Value:Q", format=",.2f")],
         )
         .properties(height=390)
-        .interactive()
     )
 
 
