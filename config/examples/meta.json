@@ -1,0 +1,22 @@
+{
+  "api_base_url": "https://graph.facebook.com",
+  "api_version": "v21.0",
+  "access_token_file": "C:\\Path\\To\\meta_access_token.txt",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "sheet": "SME Media Data",
+  "date_column": "Month",
+  "facebook_page": {
+    "enabled": false,
+    "mode": "current_snapshot",
+    "page_id": "",
+    "scorecard_column": "Facebook Followers"
+  },
+  "instagram_business": {
+    "enabled": false,
+    "mode": "current_snapshot",
+    "ig_user_id": "",
+    "scorecard_column": "Instagram Followers"
+  }
+}

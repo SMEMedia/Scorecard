@@ -1,0 +1,8 @@
+{
+  "google_sheet": {
+    "title": "Scorecard",
+    "spreadsheet_id": "your-google-sheet-id",
+    "service_account_file": "C:\\Path\\To\\google_service_account.json"
+  },
+  "discrepancy_sources": []
+}

@@ -1,0 +1,224 @@
+{
+  "service_account_file_env": "SCORECARD_GA4_SERVICE_ACCOUNT_FILE",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "reports": [
+    {
+      "name": "monthly_sme_media_data_am",
+      "description": "Monthly SME Media Data columns B-J for AM web metrics.",
+      "enabled": true,
+      "property_id_env": "GA4_AM_PROPERTY_ID",
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "dimensions": [],
+      "metrics": [
+        {
+          "api_name": "sessions",
+          "scorecard_column": "AM Sessions"
+        },
+        {
+          "api_name": "screenPageViews",
+          "scorecard_column": "AM Page Views"
+        },
+        {
+          "api_name": "totalUsers",
+          "scorecard_column": "AM Users"
+        },
+        {
+          "api_name": "newUsers",
+          "scorecard_column": "AM New Users"
+        }
+      ],
+      "derived_metrics": [
+        {
+          "name": "AM New User %%",
+          "formula": "AM New Users / AM Users"
+        },
+        {
+          "name": "AM Sessions / User",
+          "formula": "AM Sessions / AM Users"
+        },
+        {
+          "name": "AM Page Views / Session",
+          "formula": "AM Page Views / AM Sessions"
+        }
+      ]
+    },
+    {
+      "name": "monthly_sme_media_data_am_returning_users",
+      "description": "Monthly SME Media Data column F for GA4 returning users using newVsReturning.",
+      "enabled": true,
+      "property_id_env": "GA4_AM_PROPERTY_ID",
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "dimensions": [
+        "newVsReturning"
+      ],
+      "metrics": [
+        {
+          "api_name": "totalUsers",
+          "scorecard_column_prefix": "AM"
+        }
+      ],
+      "dimension_value_map": {
+        "returning": "AM Return Users"
+      }
+    },
+    {
+      "name": "monthly_sme_media_data_app",
+      "description": "Monthly SME Media Data columns Q-U for app metrics.",
+      "enabled": true,
+      "property_id_env": "GA4_APP_PROPERTY_ID",
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "dimensions": [],
+      "metrics": [
+        {
+          "api_name": "sessions",
+          "scorecard_column": "App Sessions"
+        },
+        {
+          "api_name": "screenPageViews",
+          "scorecard_column": "App Views"
+        },
+        {
+          "api_name": "totalUsers",
+          "scorecard_column": "App Users"
+        },
+        {
+          "api_name": "newUsers",
+          "scorecard_column": "App New Users"
+        }
+      ],
+      "derived_metrics": [
+        {
+          "name": "App Return Users",
+          "formula": "App Users - App New Users"
+        }
+      ]
+    },
+    {
+      "name": "monthly_ga4_search_clicks_by_term",
+      "description": "Monthly GA4 search clicks counted by grouping eventCount by searchTerm.",
+      "enabled": true,
+      "property_id_env": "GA4_AM_PROPERTY_ID",
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "dimensions": [
+        "searchTerm"
+      ],
+      "dimension_filter": {
+        "type": "exact",
+        "field_name": "eventName",
+        "value": "search_click",
+        "case_sensitive": false
+      },
+      "metrics": [
+        {
+          "api_name": "eventCount"
+        }
+      ],
+      "aggregate_metrics": [
+        {
+          "api_name": "eventCount",
+          "scorecard_column": "GA4 Search Clicks"
+        }
+      ]
+    },
+    {
+      "name": "monthly_ga4_search_impressions_by_term",
+      "description": "Monthly GA4 search impressions counted by grouping eventCount by searchTerm.",
+      "enabled": true,
+      "property_id_env": "GA4_AM_PROPERTY_ID",
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "dimensions": [
+        "searchTerm"
+      ],
+      "dimension_filter": {
+        "type": "exact",
+        "field_name": "eventName",
+        "value": "view_search_results",
+        "case_sensitive": false
+      },
+      "metrics": [
+        {
+          "api_name": "eventCount"
+        }
+      ],
+      "aggregate_metrics": [
+        {
+          "api_name": "eventCount",
+          "scorecard_column": "GA4 Search Impressions"
+        }
+      ]
+    },
+    {
+      "name": "monthly_sme_media_detail_by_medium",
+      "description": "Monthly SME Media Data (Detail) columns B-K by GA4 Session Modified GA4 Default channel group.",
+      "enabled": true,
+      "property_id_env": "GA4_AM_PROPERTY_ID",
+      "sheet": "SME Media Data (Detail)",
+      "date_column": "Month Ending",
+      "date_grain": "month",
+      "dimensions": [
+        "sessionCustomChannelGroup:8166437547"
+      ],
+      "metrics": [
+        {
+          "api_name": "sessions",
+          "scorecard_column_prefix": "Session Medium"
+        }
+      ],
+      "dimension_value_map": {
+        "unassigned": "Session Medium None / Not Set",
+        "cross-network": "Session Medium (Cross-network)",
+        "direct": "Session Medium (Direct)",
+        "email": "Session Medium (Email)",
+        "organic search": "Session Medium (Organic Search)",
+        "referral": "Session Medium (Referral)",
+        "paid search": "Session Medium (Paid Search)",
+        "organic social": "Session Medium (Organic Social)",
+        "paid social": "Session Medium (Paid Social)",
+        "organic video": "Session Medium (Video)",
+        "paid video": "Session Medium (Video)"
+      }
+    },
+    {
+      "name": "monthly_engagement_metrics",
+      "description": "Monthly SME Media Engagement Metrics columns B-K.",
+      "enabled": true,
+      "property_id_env": "GA4_AM_PROPERTY_ID",
+      "sheet": "SME Media Engagement Metrics",
+      "date_column": "Month",
+      "date_grain": "month",
+      "dimensions": [],
+      "metrics": [
+        {
+          "api_name": "totalUsers",
+          "scorecard_column": "AM.org Total Users (#)"
+        },
+        {
+          "api_name": "sessions",
+          "scorecard_column": "Sessions "
+        },
+        {
+          "api_name": "engagementRate",
+          "scorecard_column": "Engagement Rate (%)"
+        }
+      ],
+      "derived_metrics": [
+        {
+          "name": "Sessions Per User",
+          "formula": "Sessions / AM.org Total Users (#)"
+        }
+      ]
+    }
+  ]
+}

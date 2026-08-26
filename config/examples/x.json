@@ -1,0 +1,15 @@
+{
+  "api_base_url": "https://api.x.com",
+  "bearer_token_file": "C:\\Path\\To\\x_bearer_token.txt",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "sheet": "SME Media Data",
+  "date_column": "Month",
+  "account": {
+    "enabled": false,
+    "mode": "current_snapshot",
+    "username": "",
+    "scorecard_column": "X Followers"
+  }
+}

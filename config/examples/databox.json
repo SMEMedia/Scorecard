@@ -1,0 +1,28 @@
+{
+  "api_base_url": "https://api.databox.com",
+  "api_key_file": "C:\\Path\\To\\databox_api_key.txt",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "discovery": {
+    "include_datasets": false,
+    "dataset_source_ids": [],
+    "max_dataset_sources": 10
+  },
+  "sheet": "SME Media Data",
+  "date_column": "Month",
+  "metric_mappings": [
+    {
+      "databox_metric": "Facebook Followers",
+      "scorecard_column": "Facebook Followers"
+    },
+    {
+      "databox_metric": "X Followers",
+      "scorecard_column": "X Followers"
+    },
+    {
+      "databox_metric": "Instagram Followers",
+      "scorecard_column": "Instagram Followers"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+
+config/secrets/
+config/state/
+outputs/libsyn/

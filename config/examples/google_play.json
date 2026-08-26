@@ -1,0 +1,52 @@
+{
+  "auth_mode": "oauth",
+  "oauth": {
+    "client_secret_file": "C:\\Path\\To\\google_play_oauth_client_secret.json",
+    "token_file": "C:\\Path\\To\\google_play_oauth_token.json"
+  },
+  "service_account_file": "C:\\Path\\To\\service-account.json",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "google_play": {
+    "enabled": true,
+    "bucket_id": "pubsite_prod_rev_00000000000000000000",
+    "package_name": "com.example.app",
+    "report_object_template": "stats/installs/installs_{package_name}_{year_month}_country.csv",
+    "encoding": "utf-16",
+    "metric_column": "Daily User Installs",
+    "sheet": "SME Media Data",
+    "date_column": "Month",
+    "date_grain": "month",
+    "scorecard_column": "Monthly App Downloads"
+  },
+  "app_store": {
+    "enabled": true,
+    "key_type": "team",
+    "private_key_file": "C:\\Path\\To\\ApiKey_KEYID.p8",
+    "key_id": "KEYID",
+    "issuer_id": "00000000-0000-0000-0000-000000000000",
+    "vendor_number": "00000000",
+    "frequency": "MONTHLY",
+    "report_subtype": "SUMMARY",
+    "report_type": "SALES",
+    "version": "1_0",
+    "encoding": "utf-8-sig",
+    "units_column": "Units",
+    "product_type_identifiers": [
+      "1",
+      "1F",
+      "1T"
+    ],
+    "skus": [
+      "com.example.ios"
+    ],
+    "apple_ids": [
+      "0000000000"
+    ],
+    "sheet": "SME Media Data",
+    "date_column": "Month",
+    "date_grain": "month",
+    "scorecard_column": "Monthly App Downloads"
+  }
+}
