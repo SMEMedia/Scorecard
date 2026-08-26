@@ -208,7 +208,7 @@ def _render_group(frame: pd.DataFrame, date_column: str, group: str, candidates:
             column_config={
                 "Current": st.column_config.NumberColumn(format="localized"),
                 "Previous": st.column_config.NumberColumn(format="localized"),
-                "Change": st.column_config.ProgressColumn(format="%.1f%%", min_value=-1, max_value=1),
+                "Change": st.column_config.ProgressColumn(format="percent", min_value=-1, max_value=1),
             },
         )
 
@@ -304,7 +304,7 @@ def main() -> None:
             latest_changes,
             hide_index=True,
             use_container_width=True,
-            column_config={"Change": st.column_config.NumberColumn(format="%.1%%")},
+            column_config={"Change": st.column_config.NumberColumn(format="percent")},
         )
 
     with channels:
@@ -335,7 +335,7 @@ def main() -> None:
             quality_frame,
             hide_index=True,
             use_container_width=True,
-            column_config={"Completeness": st.column_config.ProgressColumn(format="%.0f%%", min_value=0, max_value=1)},
+            column_config={"Completeness": st.column_config.ProgressColumn(format="percent", min_value=0, max_value=1)},
         )
         with st.expander("Raw scorecard data"):
             st.dataframe(frame.sort_values(date_column, ascending=False), hide_index=True, use_container_width=True)
