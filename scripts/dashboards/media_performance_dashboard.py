@@ -15,7 +15,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-from scripts.lib.google_sheets_data import get_values, make_credentials  # noqa: E402
+from scripts.lib.google_sheets_data import (  # noqa: E402
+    get_values,
+    make_credentials,
+    make_credentials_from_info,
+)
 
 
 DEFAULT_CONFIG = PROJECT_ROOT / "config" / "scorecard.json"
@@ -62,10 +66,14 @@ def _secret(name: str, default: Any = None) -> Any:
         return default
 
 
-def _connection_settings(config_path: str) -> tuple[str, str]:
-    config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+def _connection_settings(config_path: str) -> tuple[str, str | dict[str, Any]]:
+    path = Path(config_path)
+    config = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     google = config.get("google_sheet", {})
     spreadsheet_id = str(_secret("spreadsheet_id", google.get("spreadsheet_id", "")))
+    inline_credentials = _secret("google_service_account")
+    if inline_credentials:
+        return spreadsheet_id, dict(inline_credentials)
     credentials_path = str(
         _secret("google_service_account_file", google.get("service_account_file", ""))
     )
@@ -110,8 +118,11 @@ def rows_to_frame(rows: list[list[Any]]) -> pd.DataFrame:
 
 @st.cache_data(ttl=900, show_spinner=False)
 def load_scorecard(config_path: str) -> dict[str, pd.DataFrame]:
-    spreadsheet_id, credentials_path = _connection_settings(config_path)
-    credentials = make_credentials(credentials_path)
+    spreadsheet_id, credentials_config = _connection_settings(config_path)
+    if isinstance(credentials_config, dict):
+        credentials = make_credentials_from_info(credentials_config)
+    else:
+        credentials = make_credentials(credentials_config)
     tabs = [*CADENCE_TABS.values(), "Monthly Media Detail", "Monthly Engagement"]
     return {
         tab: rows_to_frame(get_values(credentials, spreadsheet_id, tab))

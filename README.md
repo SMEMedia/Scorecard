@@ -54,13 +54,29 @@ and weekly executive KPIs, period-over-period changes, cross-channel trends, med
 detail, engagement reporting, and completeness checks. By default it uses the
 spreadsheet ID and service-account file in `config/scorecard.json`.
 
-For deployment (for example, Streamlit Community Cloud), add these values to
-`.streamlit/secrets.toml` or the host's secrets manager instead of committing a
-credential file:
+For local use, the dashboard reads the service-account file configured in
+`config/scorecard.json`. For Streamlit Community Cloud, store the service-account
+fields directly in the app's Secrets settings instead of committing a credential
+file or using a local file path:
 
 ```toml
 spreadsheet_id = "your-google-sheet-id"
-google_service_account_file = "path/to/google_service_account.json"
+
+[google_service_account]
+type = "service_account"
+project_id = "your-project-id"
+private_key_id = "your-private-key-id"
+private_key = """-----BEGIN PRIVATE KEY-----
+your-private-key
+-----END PRIVATE KEY-----
+"""
+client_email = "service-account@your-project.iam.gserviceaccount.com"
+client_id = "your-client-id"
+auth_uri = "https://accounts.google.com/o/oauth2/auth"
+token_uri = "https://oauth2.googleapis.com/token"
+auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+client_x509_cert_url = "your-client-certificate-url"
+universe_domain = "googleapis.com"
 ```
 
 ## Google Sheet Target

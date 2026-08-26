@@ -233,6 +233,15 @@ def make_credentials(service_account_file: str | Path) -> service_account.Creden
     )
 
 
+def make_credentials_from_info(
+    service_account_info: dict[str, Any],
+) -> service_account.Credentials:
+    return service_account.Credentials.from_service_account_info(
+        service_account_info,
+        scopes=[SHEETS_SCOPE, DRIVE_METADATA_SCOPE],
+    )
+
+
 def authorized_request(
     credentials: service_account.Credentials,
     url: str,

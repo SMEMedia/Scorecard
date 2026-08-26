@@ -1,0 +1,5 @@
+streamlit>=1.50,<2
+altair>=5,<7
+pandas>=2.2,<4
+google-auth>=2.40,<3
+requests>=2.32,<3
