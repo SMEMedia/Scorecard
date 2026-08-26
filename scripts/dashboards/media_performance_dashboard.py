@@ -223,26 +223,43 @@ def _render_kpis(frame: pd.DataFrame, metrics: list[str]) -> None:
             container.metric(metric, _format_value(metric, current.get(metric)), _delta(current.get(metric), old))
 
 
-def _render_group(frame: pd.DataFrame, date_column: str, group: str, candidates: list[str]) -> None:
+def _render_change_table(changes: pd.DataFrame) -> None:
+    st.dataframe(
+        changes,
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "Metric": st.column_config.TextColumn(width="large"),
+            "Current": st.column_config.NumberColumn(format="localized", width="small"),
+            "Previous": st.column_config.NumberColumn(format="localized", width="small"),
+            "Change": st.column_config.NumberColumn(format="percent", width="small"),
+        },
+    )
+
+
+def _render_group(
+    frame: pd.DataFrame,
+    date_column: str,
+    group: str,
+    candidates: list[str],
+    *,
+    stacked: bool = False,
+) -> None:
     metrics = [metric for metric in candidates if metric in frame and frame[metric].notna().any()]
     if not metrics:
         st.info(f"No {group.lower()} data is populated for the selected range.")
         return
-    left, right = st.columns([0.66, 0.34])
+    changes = _period_change_table(frame, metrics)
+    if stacked:
+        st.altair_chart(_trend_chart(frame, date_column, metrics[:6]), use_container_width=True)
+        _render_change_table(changes)
+        return
+
+    left, right = st.columns([0.64, 0.36])
     with left:
         st.altair_chart(_trend_chart(frame, date_column, metrics[:6]), use_container_width=True)
     with right:
-        changes = _period_change_table(frame, metrics)
-        st.dataframe(
-            changes,
-            hide_index=True,
-            use_container_width=True,
-            column_config={
-                "Current": st.column_config.NumberColumn(format="localized"),
-                "Previous": st.column_config.NumberColumn(format="localized"),
-                "Change": st.column_config.NumberColumn(format="percent"),
-            },
-        )
+        _render_change_table(changes)
 
 
 def _render_supporting_tab(frame: pd.DataFrame, title: str) -> None:
@@ -394,6 +411,7 @@ def main() -> None:
                     linkedin_date_column,
                     "LinkedIn",
                     linkedin_metrics,
+                    stacked=True,
                 )
 
     with detail:
