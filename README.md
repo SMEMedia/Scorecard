@@ -119,26 +119,9 @@ The app converts these settings into temporary, ignored files expected by the ex
 
 Libsyn credentials are not stored in Streamlit. The operator manually downloads and uploads the report for each run.
 
-If YouTube reports that authorization expired or was revoked, run the following on an administrator's computer, sign in through the browser window, and replace the complete `[youtube_oauth_token]` section in Streamlit Secrets with the regenerated `config/state/youtube_oauth_token.json` values. The hosted app intentionally does not attempt an interactive Google login.
+### Refresh the YouTube key
 
-```powershell
-python scripts/sources/youtube.py --authorize
-```
-
-If this happens every seven days, check the Google Cloud OAuth app's **Audience / Publishing status**. External OAuth apps left in **Testing** receive refresh tokens that expire after seven days. Move the app to **In production**, use an **Internal** app for eligible Workspace users, or have the Workspace administrator mark the app trusted, as appropriate for SME policy. Reauthorize once after changing that setting.
-
-### Set up YouTube reconnection
-
-The Streamlit **Reconnect YouTube** screen requires a one-time web OAuth client setup:
-
-1. In Google Cloud Console, open the same project used for the YouTube APIs.
-2. Go to **Google Auth Platform → Clients** and choose **Create client**.
-3. Choose **Web application**. This is separate from the existing Desktop client.
-4. Under **Authorized redirect URIs**, enter the exact public Streamlit app URL, including its final slash, such as `https://YOUR-STREAMLIT-APP.streamlit.app/`.
-5. Download or open the client details. Copy the fields inside its `web` object into `[youtube_web_oauth_client]` in Streamlit Secrets.
-6. Set the top-level `youtube_redirect_uri` to that exact same Streamlit URL and save Secrets.
-
-When YouTube fails during an update:
+When an update says that YouTube authorization expired or was revoked:
 
 1. Choose **Reconnect YouTube** in the app's left menu.
 2. Select **Start YouTube sign-in**, then **Continue to Google**.
@@ -188,17 +171,6 @@ scripts/lib/                 Google Sheets and runtime-secret helpers
 scripts/pipelines/           Rules that protect formula/manual columns
 scripts/sources/             Source-system integrations and required helpers
 ```
-
-### Ownership handoff
-
-Before transferring this project:
-
-1. Transfer or fork the GitHub repository into the new owner's organization.
-2. Give the new owner access to the Streamlit deployment.
-3. Re-enter secrets under the new owner's deployment; secrets do not transfer through Git.
-4. Give the new Google service account and source identities the required permissions.
-5. Run Weekly and Monthly previews, then one supervised saved update.
-6. Remove the former owner's access after the supervised update succeeds.
 
 ### Security and maintenance
 
