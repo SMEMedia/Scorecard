@@ -4,6 +4,7 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -101,6 +102,17 @@ def render_update_page() -> None:
     st.info(
         "Weekly uses the latest completed Saturday. Monthly uses the latest completed month."
     )
+    st.subheader("Libsyn report")
+    st.write(
+        "In Libsyn, download the Total Downloads report for **Last 90 Days** as CSV, "
+        "then drag the downloaded file below. Libsyn sometimes supplies a ZIP file with "
+        "a CSV name; either format is accepted."
+    )
+    libsyn_report = st.file_uploader(
+        "Drag and drop the Libsyn report",
+        type=["csv", "zip"],
+        help="The report is used for this update only and is not stored in GitHub.",
+    )
     preview = st.checkbox(
         "Preview only (do not save changes)",
         value=True,
@@ -111,21 +123,32 @@ def render_update_page() -> None:
         value=False,
     )
     label = "Preview update" if preview else "Update scorecard now"
-    if st.button(label, type="primary", disabled=not confirmed, use_container_width=True):
+    if not libsyn_report:
+        st.caption("Upload the Libsyn report to enable the update button.")
+    if st.button(
+        label,
+        type="primary",
+        disabled=not confirmed or libsyn_report is None,
+        use_container_width=True,
+    ):
         try:
             materialize_streamlit_secrets(st.secrets)
             command = [sys.executable, str(PROJECT_ROOT / "scorecard.py"), cadence.lower()]
             if preview:
                 command.append("--dry-run")
-            with st.spinner("Collecting data. This can take several minutes..."):
-                result = subprocess.run(
-                    command,
-                    cwd=PROJECT_ROOT,
-                    capture_output=True,
-                    text=True,
-                    timeout=600,
-                    check=False,
-                )
+            with tempfile.TemporaryDirectory(prefix="scorecard_libsyn_") as temp_dir:
+                upload_path = Path(temp_dir) / Path(libsyn_report.name).name
+                upload_path.write_bytes(libsyn_report.getvalue())
+                command.extend(["--libsyn-csv", str(upload_path)])
+                with st.spinner("Collecting data. This can take several minutes..."):
+                    result = subprocess.run(
+                        command,
+                        cwd=PROJECT_ROOT,
+                        capture_output=True,
+                        text=True,
+                        timeout=600,
+                        check=False,
+                    )
         except subprocess.TimeoutExpired:
             st.error("The update took longer than 10 minutes and was stopped. Please contact the scorecard administrator.")
             return

@@ -16,11 +16,13 @@ Open the hosted Streamlit app in your web browser.
 
 1. Choose **Update scorecard** in the left menu.
 2. Choose **Weekly** or **Monthly**.
-3. Leave **Preview only** checked and select **Preview update**.
-4. Open **Update details** and review the planned changes.
-5. If the preview looks correct, clear **Preview only**.
-6. Check the confirmation box and select **Update scorecard now**.
-7. Wait for the green success message before closing the page.
+3. In Libsyn, download **Total Downloads** for **Last 90 Days** as CSV.
+4. Drag the downloaded Libsyn report into the upload box.
+5. Leave **Preview only** checked and select **Preview update**.
+6. Open **Update details** and review the planned changes.
+7. If the preview looks correct, clear **Preview only**.
+8. Check the confirmation box and select **Update scorecard now**.
+9. Wait for the green success message before closing the page.
 
 The weekly update uses the latest completed Saturday. The monthly update uses the latest completed calendar month. Updates may take several minutes because the app contacts each source system.
 
@@ -97,10 +99,6 @@ app_store_private_key = """-----BEGIN PRIVATE KEY-----
 [youtube_oauth_token]
 # Copy the complete authorized-user token JSON here.
 
-[libsyn_credentials]
-username = "..."
-password = "..."
-
 [meta]
 page_access_token = "..."
 
@@ -110,7 +108,13 @@ access_token = "..."
 
 The app converts these settings into temporary, ignored files expected by the existing source integrations. OAuth tokens must already be authorized; a hosted browser cannot complete a local OAuth consent flow.
 
-Libsyn uses browser automation. Confirm that the hosting environment has Playwright Chromium available before depending on Libsyn in the hosted run. If not, that source will be listed as unavailable and an administrator must configure a supported Libsyn export method.
+Libsyn credentials are not stored in Streamlit. The operator manually downloads and uploads the report for each run.
+
+If YouTube reports that authorization expired or was revoked, run the following on an administrator's computer, sign in through the browser window, and replace the complete `[youtube_oauth_token]` section in Streamlit Secrets with the regenerated `config/state/youtube_oauth_token.json` values. The hosted app intentionally does not attempt an interactive Google login.
+
+```powershell
+python scripts/sources/youtube.py --authorize
+```
 
 ### Source access checklist
 
@@ -119,7 +123,7 @@ Libsyn uses browser automation. Confirm that the hosting environment has Playwri
 - The HubSpot private app has the scopes required by its configured email endpoints.
 - The YouTube OAuth token includes YouTube Data read-only and YouTube Analytics read-only scopes.
 - App Store Connect and Google Play credentials can read the configured reports.
-- Meta, Instagram, X, and Libsyn credentials are current.
+- Meta, Instagram, and X credentials are current.
 
 Run both previews after changing any credential.
 

@@ -88,6 +88,11 @@ def parse_args() -> argparse.Namespace:
         help="Path to the monthly Libsyn config.",
     )
     parser.add_argument(
+        "--libsyn-csv",
+        default=None,
+        help="Path to a manually downloaded Libsyn CSV or ZIP report.",
+    )
+    parser.add_argument(
         "--search-console-config",
         default=str(DEFAULT_SEARCH_CONSOLE_CONFIG),
         help="Path to the shared Search Console config.",
@@ -123,6 +128,7 @@ def monthly_source_fetchers(
     meta_social_config: str | Path,
     x_social_config: str | Path,
     libsyn_config: str | Path,
+    libsyn_csv: str | Path | None,
     search_console_config: str | Path,
 ) -> list[SourceFetcher]:
     return [
@@ -130,7 +136,7 @@ def monthly_source_fetchers(
         walsworth_thermostats.fetch_monthly,
         personify.fetch_monthly,
         lambda: app_stores.fetch_monthly(google_play_config),
-        lambda: libsyn.fetch_monthly(libsyn_config),
+        lambda: libsyn.fetch_monthly(libsyn_config, libsyn_csv),
         lambda: youtube.fetch_monthly(youtube_config),
         lambda: search_console.fetch_monthly(search_console_config),
         lambda: hubspot.fetch_monthly(hubspot_config),
@@ -154,6 +160,7 @@ def main() -> None:
         args.meta_social_config,
         args.x_social_config,
         args.libsyn_config,
+        args.libsyn_csv,
         args.search_console_config,
     ):
         result = fetch()

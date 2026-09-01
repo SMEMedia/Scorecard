@@ -49,6 +49,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--hubspot-config", default=str(DEFAULT_HUBSPOT_CONFIG))
     parser.add_argument("--youtube-config", default=str(DEFAULT_YOUTUBE_CONFIG))
     parser.add_argument("--libsyn-config", default=str(DEFAULT_LIBSYN_CONFIG))
+    parser.add_argument(
+        "--libsyn-csv",
+        default=None,
+        help="Path to a manually downloaded Libsyn CSV or ZIP report.",
+    )
     parser.add_argument("--search-console-config", default=str(DEFAULT_SEARCH_CONSOLE_CONFIG))
     parser.add_argument(
         "--dry-run",
@@ -91,7 +96,7 @@ def weekly_source_fetchers(args: argparse.Namespace) -> list[SourceFetcher]:
         fetch_weekly_or_placeholder(ga4, "GA4", args.ga4_config),
         fetch_weekly_or_placeholder(walsworth_thermostats, "Walsworth Thermostats"),
         fetch_weekly_or_placeholder(personify, "Personify / Fonteva"),
-        fetch_weekly_or_placeholder(libsyn, "Libsyn", args.libsyn_config),
+        lambda: libsyn.fetch_weekly(args.libsyn_config, args.libsyn_csv),
         fetch_weekly_or_placeholder(youtube, "YouTube", args.youtube_config),
         fetch_weekly_or_placeholder(search_console, "Google Search Console", args.search_console_config),
         fetch_weekly_or_placeholder(hubspot, "HubSpot", args.hubspot_config),

@@ -4,3 +4,5 @@ __pycache__/
 config/secrets/
 config/state/
 outputs/libsyn/
+.streamlit/secrets.toml
+streamlit-secrets.toml

@@ -118,14 +118,12 @@ def make_oauth_credentials(config: dict[str, Any]) -> Credentials:
         if credentials and credentials.expired and credentials.refresh_token and not needs_scope_upgrade:
             try:
                 credentials.refresh(GoogleAuthRequest())
-            except RefreshError:
-                token_file.unlink(missing_ok=True)
-                credentials = None
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    oauth_client_secret_file(config),
-                    scopes=SCOPES,
-                )
-                credentials = flow.run_local_server(port=0)
+            except RefreshError as error:
+                raise ConfigError(
+                    "The YouTube authorization has expired or was revoked. "
+                    "An administrator must authorize YouTube again locally and replace "
+                    "the youtube_oauth_token value in Streamlit Secrets."
+                ) from error
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 oauth_client_secret_file(config),
@@ -137,6 +135,22 @@ def make_oauth_credentials(config: dict[str, Any]) -> Credentials:
         token_file.write_text(credentials.to_json(), encoding="utf-8")
 
     return credentials
+
+
+def authorize_oauth(config_path: str | Path | None = None) -> Path:
+    """Run the administrator-only local browser flow and replace the saved token."""
+    config, _, used_example = load_config(config_path)
+    if used_example:
+        raise ConfigError("Create the YouTube source config before authorizing YouTube.")
+    flow = InstalledAppFlow.from_client_secrets_file(
+        oauth_client_secret_file(config),
+        scopes=SCOPES,
+    )
+    credentials = flow.run_local_server(port=0)
+    token_file = oauth_token_file(config)
+    token_file.parent.mkdir(parents=True, exist_ok=True)
+    token_file.write_text(credentials.to_json(), encoding="utf-8")
+    return token_file
 
 
 def service_account_file(config: dict[str, Any]) -> str:
@@ -502,11 +516,20 @@ def parse_args() -> argparse.Namespace:
         help="Path to YouTube source config. Defaults to config/sources/monthly/youtube.json.",
     )
     parser.add_argument("--weekly", action="store_true", help="Fetch weekly records.")
+    parser.add_argument(
+        "--authorize",
+        action="store_true",
+        help="Open a local browser to replace the saved YouTube OAuth token.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if args.authorize:
+        token_file = authorize_oauth(args.config)
+        print(f"YouTube authorization saved to {token_file}.")
+        return
     result = fetch_weekly(args.config) if args.weekly else fetch_monthly(args.config)
     print(json.dumps(result.__dict__, indent=2, default=str))
 

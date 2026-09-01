@@ -37,7 +37,6 @@ def materialize_streamlit_secrets(secrets: Mapping[str, Any]) -> list[str]:
         "google_service_account": SECRETS_DIR / "google_service_account.json",
         "google_oauth_client_secret": SECRETS_DIR / "google_oauth_client_secret.json",
         "youtube_oauth_token": STATE_DIR / "youtube_oauth_token.json",
-        "libsyn_credentials": SECRETS_DIR / "libsyn_credentials.json",
     }
     text_files = {
         "hubspot_private_app_token": SECRETS_DIR / "hubspot_private_app_token.txt",

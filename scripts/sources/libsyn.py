@@ -703,7 +703,11 @@ def inspect_assets(config_path: str | Path | None = None) -> SourceResult:
         return SourceResult(source=SOURCE_NAME, implemented=False, notes=[api_error_note(error)])
 
 
-def _fetch(config_path: str | Path | None = None, cadence: str = "monthly") -> SourceResult:
+def _fetch(
+    config_path: str | Path | None = None,
+    cadence: str = "monthly",
+    csv_file: str | Path | None = None,
+) -> SourceResult:
     config, loaded_path, used_example = load_config(config_path)
     if used_example:
         return SourceResult(
@@ -715,7 +719,16 @@ def _fetch(config_path: str | Path | None = None, cadence: str = "monthly") -> S
             ],
         )
 
+    if not csv_file:
+        return SourceResult(
+            source=SOURCE_NAME,
+            implemented=False,
+            notes=["No Libsyn report was uploaded; podcast downloads were skipped."],
+        )
+
     try:
+        config["csv_file"] = str(csv_file)
+        config["browser_export_enabled"] = False
         csv_text = download_csv(config, loaded_path)
         rows = parse_rows(csv_text)
         downloads = downloads_total(config, rows)
@@ -736,7 +749,7 @@ def _fetch(config_path: str | Path | None = None, cadence: str = "monthly") -> S
             ],
             notes=[
                 f"Loaded Libsyn config from {loaded_path}.",
-                f"Downloaded {len(rows)} Libsyn CSV row(s).",
+                f"Read {len(rows)} row(s) from the uploaded Libsyn report.",
                 f"Mapped {downloads} downloads to {config['scorecard_column']}.",
             ],
         )
@@ -746,12 +759,18 @@ def _fetch(config_path: str | Path | None = None, cadence: str = "monthly") -> S
         return SourceResult(source=SOURCE_NAME, implemented=False, notes=[api_error_note(error)])
 
 
-def fetch_monthly(config_path: str | Path | None = None) -> SourceResult:
-    return _fetch(config_path, "monthly")
+def fetch_monthly(
+    config_path: str | Path | None = None,
+    csv_file: str | Path | None = None,
+) -> SourceResult:
+    return _fetch(config_path, "monthly", csv_file)
 
 
-def fetch_weekly(config_path: str | Path | None = None) -> SourceResult:
-    return _fetch(config_path, "weekly")
+def fetch_weekly(
+    config_path: str | Path | None = None,
+    csv_file: str | Path | None = None,
+) -> SourceResult:
+    return _fetch(config_path, "weekly", csv_file)
 
 
 def parse_args() -> argparse.Namespace:
