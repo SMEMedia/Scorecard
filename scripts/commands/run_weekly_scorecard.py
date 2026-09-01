@@ -13,7 +13,12 @@ if str(SCRIPT_ROOT) not in sys.path:
 
 from lib.google_sheets_data import write_updates as write_google_sheet_updates
 from pipelines.weekly_pipeline import records_to_updates
-from sources.base import SourceResult, not_implemented_result
+from sources.base import (
+    SourceResult,
+    not_implemented_result,
+    safe_configured_source_fetch,
+    safe_source_fetch,
+)
 from sources.snapshots import DEFAULT_SNAPSHOT_FILE, apply_snapshot_mode
 from sources import (
     ga4,
@@ -92,14 +97,31 @@ def fetch_weekly_or_placeholder(
 
 
 def weekly_source_fetchers(args: argparse.Namespace) -> list[SourceFetcher]:
+    guarded = lambda name, config, fetch: lambda: safe_configured_source_fetch(
+        name, config, fetch
+    )
     return [
-        fetch_weekly_or_placeholder(ga4, "GA4", args.ga4_config),
+        guarded("GA4", args.ga4_config, lambda: ga4.fetch_weekly(args.ga4_config)),
         fetch_weekly_or_placeholder(walsworth_thermostats, "Walsworth Thermostats"),
         fetch_weekly_or_placeholder(personify, "Personify / Fonteva"),
-        lambda: libsyn.fetch_weekly(args.libsyn_config, args.libsyn_csv),
-        fetch_weekly_or_placeholder(youtube, "YouTube", args.youtube_config),
-        fetch_weekly_or_placeholder(search_console, "Google Search Console", args.search_console_config),
-        fetch_weekly_or_placeholder(hubspot, "HubSpot", args.hubspot_config),
+        lambda: safe_source_fetch(
+            "Libsyn", lambda: libsyn.fetch_weekly(args.libsyn_config, args.libsyn_csv)
+        ),
+        guarded(
+            "YouTube",
+            args.youtube_config,
+            lambda: youtube.fetch_weekly(args.youtube_config),
+        ),
+        guarded(
+            "Google Search Console",
+            args.search_console_config,
+            lambda: search_console.fetch_weekly(args.search_console_config),
+        ),
+        guarded(
+            "HubSpot",
+            args.hubspot_config,
+            lambda: hubspot.fetch_weekly(args.hubspot_config),
+        ),
     ]
 
 

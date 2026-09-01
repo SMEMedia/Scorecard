@@ -122,7 +122,8 @@ def make_oauth_credentials(config: dict[str, Any]) -> Credentials:
                 raise ConfigError(
                     "The YouTube authorization has expired or was revoked. "
                     "An administrator must authorize YouTube again locally and replace "
-                    "the youtube_oauth_token value in Streamlit Secrets."
+                    "the youtube_oauth_token value in Streamlit Secrets. If this recurs "
+                    "every seven days, move the Google OAuth app out of Testing status."
                 ) from error
         else:
             flow = InstalledAppFlow.from_client_secrets_file(

@@ -115,6 +115,8 @@ If YouTube reports that authorization expired or was revoked, run the following 
 python scripts/sources/youtube.py --authorize
 ```
 
+If this happens every seven days, check the Google Cloud OAuth app's **Audience / Publishing status**. External OAuth apps left in **Testing** receive refresh tokens that expire after seven days. Move the app to **In production**, use an **Internal** app for eligible Workspace users, or have the Workspace administrator mark the app trusted, as appropriate for SME policy. Reauthorize once after changing that setting.
+
 ### Source access checklist
 
 - The Google service account can edit the Scorecard Google Sheet.

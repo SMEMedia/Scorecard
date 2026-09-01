@@ -12,7 +12,7 @@ if str(SCRIPT_ROOT) not in sys.path:
 
 from lib.google_sheets_data import write_updates as write_google_sheet_updates
 from pipelines.monthly_pipeline import records_to_updates
-from sources.base import SourceResult
+from sources.base import SourceResult, safe_configured_source_fetch, safe_source_fetch
 from sources.snapshots import DEFAULT_SNAPSHOT_FILE, apply_snapshot_mode
 from sources import (
     app_stores,
@@ -131,17 +131,34 @@ def monthly_source_fetchers(
     libsyn_csv: str | Path | None,
     search_console_config: str | Path,
 ) -> list[SourceFetcher]:
+    guarded = lambda name, config, fetch: lambda: safe_configured_source_fetch(
+        name, config, fetch
+    )
     return [
-        lambda: ga4.fetch_monthly(ga4_config),
+        guarded("GA4", ga4_config, lambda: ga4.fetch_monthly(ga4_config)),
         walsworth_thermostats.fetch_monthly,
         personify.fetch_monthly,
-        lambda: app_stores.fetch_monthly(google_play_config),
-        lambda: libsyn.fetch_monthly(libsyn_config, libsyn_csv),
-        lambda: youtube.fetch_monthly(youtube_config),
-        lambda: search_console.fetch_monthly(search_console_config),
-        lambda: hubspot.fetch_monthly(hubspot_config),
-        lambda: meta_social.fetch_monthly(meta_social_config),
-        lambda: x_social.fetch_monthly(x_social_config),
+        guarded(
+            "Google Play Console + App Store",
+            google_play_config,
+            lambda: app_stores.fetch_monthly(google_play_config),
+        ),
+        lambda: safe_source_fetch(
+            "Libsyn", lambda: libsyn.fetch_monthly(libsyn_config, libsyn_csv)
+        ),
+        guarded("YouTube", youtube_config, lambda: youtube.fetch_monthly(youtube_config)),
+        guarded(
+            "Google Search Console",
+            search_console_config,
+            lambda: search_console.fetch_monthly(search_console_config),
+        ),
+        guarded("HubSpot", hubspot_config, lambda: hubspot.fetch_monthly(hubspot_config)),
+        guarded(
+            "Meta Social",
+            meta_social_config,
+            lambda: meta_social.fetch_monthly(meta_social_config),
+        ),
+        guarded("X", x_social_config, lambda: x_social.fetch_monthly(x_social_config)),
         linkedin_analytics.fetch_monthly,
     ]
 
