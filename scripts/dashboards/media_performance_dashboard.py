@@ -109,9 +109,9 @@ def render_update_page() -> None:
         "a CSV name; either format is accepted."
     )
     libsyn_report = st.file_uploader(
-        "Drag and drop the Libsyn report",
+        "Drag and drop the Libsyn report (optional)",
         type=["csv", "zip"],
-        help="The report is used for this update only and is not stored in GitHub.",
+        help="If omitted, the update continues without changing Libsyn podcast downloads.",
     )
     preview = st.checkbox(
         "Preview only (do not save changes)",
@@ -124,11 +124,11 @@ def render_update_page() -> None:
     )
     label = "Preview update" if preview else "Update scorecard now"
     if not libsyn_report:
-        st.caption("Upload the Libsyn report to enable the update button.")
+        st.caption("No report uploaded: Libsyn podcast downloads will be skipped.")
     if st.button(
         label,
         type="primary",
-        disabled=not confirmed or libsyn_report is None,
+        disabled=not confirmed,
         use_container_width=True,
     ):
         try:
@@ -137,9 +137,10 @@ def render_update_page() -> None:
             if preview:
                 command.append("--dry-run")
             with tempfile.TemporaryDirectory(prefix="scorecard_libsyn_") as temp_dir:
-                upload_path = Path(temp_dir) / Path(libsyn_report.name).name
-                upload_path.write_bytes(libsyn_report.getvalue())
-                command.extend(["--libsyn-csv", str(upload_path)])
+                if libsyn_report is not None:
+                    upload_path = Path(temp_dir) / Path(libsyn_report.name).name
+                    upload_path.write_bytes(libsyn_report.getvalue())
+                    command.extend(["--libsyn-csv", str(upload_path)])
                 with st.spinner("Collecting data. This can take several minutes..."):
                     result = subprocess.run(
                         command,

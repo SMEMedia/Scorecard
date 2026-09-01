@@ -16,13 +16,12 @@ Open the hosted Streamlit app in your web browser.
 
 1. Choose **Update scorecard** in the left menu.
 2. Choose **Weekly** or **Monthly**.
-3. In Libsyn, download **Total Downloads** for **Last 90 Days** as CSV.
-4. Drag the downloaded Libsyn report into the upload box.
-5. Leave **Preview only** checked and select **Preview update**.
-6. Open **Update details** and review the planned changes.
-7. If the preview looks correct, clear **Preview only**.
-8. Check the confirmation box and select **Update scorecard now**.
-9. Wait for the green success message before closing the page.
+3. Optional: In Libsyn, download **Total Downloads** for **Last 90 Days** as CSV and drag it into the upload box. If omitted, podcast downloads are skipped.
+4. Leave **Preview only** checked and select **Preview update**.
+5. Open **Update details** and review the planned changes.
+6. If the preview looks correct, clear **Preview only**.
+7. Check the confirmation box and select **Update scorecard now**.
+8. Wait for the green success message before closing the page.
 
 The weekly update uses the latest completed Saturday. The monthly update uses the latest completed calendar month. Updates may take several minutes because the app contacts each source system.
 
