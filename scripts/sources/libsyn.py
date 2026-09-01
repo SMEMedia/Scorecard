@@ -326,7 +326,7 @@ def download_with_playwright(
     config: dict[str, Any],
     config_path: str | Path | None = None,
 ) -> Path:
-    helper = PROJECT_ROOT / "scripts" / "tools" / "libsyn_export_browser.py"
+    helper = PROJECT_ROOT / "scripts" / "sources" / "libsyn_export_browser.py"
     resolved_config_path = Path(
         config_path
         or os.environ.get("SCORECARD_LIBSYN_CONFIG", DEFAULT_CONFIG)

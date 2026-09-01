@@ -1,0 +1,40 @@
+{
+  "service_account_file": "config/secrets/google_service_account.json",
+  "site_url": "sc-domain:advancedmanufacturing.org",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "monthly": {
+    "enabled": true,
+    "sheet": "SME Media Data",
+    "date_column": "Month",
+    "date_grain": "month",
+    "columns": {
+      "clicks": "Google Search Console Search Clicks",
+      "impressions": "Google Search Console Search Impressions",
+      "position": "Ave Search Position",
+      "ctr": "Search CTR"
+    },
+    "query_grouped_columns": {
+      "clicks": "GA4 Search Clicks",
+      "impressions": "GA4 Search Impressions"
+    }
+  },
+  "weekly": {
+    "enabled": true,
+    "week_ending_weekday": 5,
+    "sheet": "SME Media Data",
+    "date_column": "Week Ending",
+    "date_grain": "week",
+    "columns": {
+      "clicks": "Google Search Console Search Clicks",
+      "impressions": "Google Search Console Search Impressions",
+      "position": "Ave Search Position",
+      "ctr": "Search CTR"
+    },
+    "query_grouped_columns": {
+      "clicks": "GA4 Search Clicks",
+      "impressions": "GA4 Search Impressions"
+    }
+  }
+}

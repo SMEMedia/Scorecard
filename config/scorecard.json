@@ -1,0 +1,7 @@
+{
+    "google_sheet":  {
+                         "title":  "Scorecard",
+                         "spreadsheet_id":  "1byunytq2svgs56Sp4xwogYEhQOAv2xHw5HTELfzBRi4",
+                         "service_account_file":  "config/secrets/google_service_account.json"
+                     }
+}

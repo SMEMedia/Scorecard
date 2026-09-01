@@ -1,0 +1,198 @@
+{
+  "auth_mode": "service_account",
+  "oauth": {
+    "client_secret_file": "config/secrets/google_oauth_client_secret.json",
+    "token_file": "config/state/ga4_oauth_token.json"
+  },
+  "service_account_file": "config/secrets/google_service_account.json",
+  "default_date_range": {
+    "mode": "latest_completed_week",
+    "week_ending_weekday": 5
+  },
+  "reports": [
+    {
+      "name": "weekly_sme_media_data_am",
+      "description": "Weekly SME Media Data columns B-J for AM web metrics.",
+      "enabled": true,
+      "property_id": "432233519",
+      "sheet": "SME Media Data",
+      "date_column": "Week Ending",
+      "date_grain": "week",
+      "dimensions": [],
+      "metrics": [
+        {
+          "api_name": "sessions",
+          "scorecard_column": "AM Sessions"
+        },
+        {
+          "api_name": "screenPageViews",
+          "scorecard_column": "AM Page Views"
+        },
+        {
+          "api_name": "totalUsers",
+          "scorecard_column": "AM Users"
+        },
+        {
+          "api_name": "newUsers",
+          "scorecard_column": "AM New Users"
+        }
+      ],
+      "derived_metrics": [
+        {
+          "name": "AM New User %%",
+          "formula": "AM New Users / AM Users"
+        },
+        {
+          "name": "AM Sessions / User",
+          "formula": "AM Sessions / AM Users"
+        },
+        {
+          "name": "AM Page Views / Session",
+          "formula": "AM Page Views / AM Sessions"
+        }
+      ]
+    },
+    {
+      "name": "weekly_sme_media_data_am_returning_users",
+      "description": "Weekly SME Media Data AM returning users using newVsReturning.",
+      "enabled": true,
+      "property_id": "432233519",
+      "sheet": "SME Media Data",
+      "date_column": "Week Ending",
+      "date_grain": "week",
+      "dimensions": [
+        "newVsReturning"
+      ],
+      "metrics": [
+        {
+          "api_name": "totalUsers",
+          "scorecard_column_prefix": "AM"
+        }
+      ],
+      "dimension_value_map": {
+        "returning": "AM Return Users"
+      }
+    },
+    {
+      "name": "weekly_sme_media_data_app",
+      "description": "Weekly SME Media Data columns K-O for app metrics.",
+      "enabled": true,
+      "property_id": "432233519",
+      "sheet": "SME Media Data",
+      "date_column": "Week Ending",
+      "date_grain": "week",
+      "dimensions": [],
+      "dimension_filter": {
+        "type": "in_list",
+        "field_name": "streamName",
+        "values": [
+          "com.smemedia.android",
+          "SME Media"
+        ]
+      },
+      "metrics": [
+        {
+          "api_name": "sessions",
+          "scorecard_column": "App Sessions"
+        },
+        {
+          "api_name": "screenPageViews",
+          "scorecard_column": "App Views"
+        },
+        {
+          "api_name": "totalUsers",
+          "scorecard_column": "App Users"
+        },
+        {
+          "api_name": "newUsers",
+          "scorecard_column": "App New Users"
+        }
+      ],
+      "derived_metrics": [
+        {
+          "name": "App Return Users",
+          "formula": "App Users - App New Users"
+        }
+      ]
+    },
+    {
+      "name": "weekly_am_web_podcast_plays",
+      "description": "Weekly SME Media Data column R for AM.org web podcast plays.",
+      "enabled": true,
+      "property_id": "432233519",
+      "sheet": "SME Media Data",
+      "date_column": "Week Ending",
+      "date_grain": "week",
+      "dimensions": [],
+      "dimension_filter": {
+        "type": "and_group",
+        "expressions": [
+          {
+            "type": "exact",
+            "field_name": "eventName",
+            "value": "audio",
+            "case_sensitive": false
+          },
+          {
+            "type": "exact",
+            "field_name": "customEvent:audio_player_action",
+            "value": "play",
+            "case_sensitive": false
+          }
+        ]
+      },
+      "metrics": [
+        {
+          "api_name": "eventCount",
+          "scorecard_column": "AM Web Podcast Plays"
+        }
+      ]
+    },
+    {
+      "name": "weekly_ga4_search_clicks_by_term",
+      "description": "Weekly GA4 organic Google search clicks from the Search Console-linked GA4 metric, aggregated from daily rows.",
+      "enabled": false,
+      "property_id": "432233519",
+      "sheet": "SME Media Data",
+      "date_column": "Week Ending",
+      "date_grain": "week",
+      "dimensions": [
+        "date"
+      ],
+      "metrics": [
+        {
+          "api_name": "organicGoogleSearchClicks"
+        }
+      ],
+      "aggregate_metrics": [
+        {
+          "api_name": "organicGoogleSearchClicks",
+          "scorecard_column": "GA4 Search Clicks"
+        }
+      ]
+    },
+    {
+      "name": "weekly_ga4_search_impressions_by_term",
+      "description": "Weekly GA4 organic Google search impressions from the Search Console-linked GA4 metric, aggregated from daily rows.",
+      "enabled": false,
+      "property_id": "432233519",
+      "sheet": "SME Media Data",
+      "date_column": "Week Ending",
+      "date_grain": "week",
+      "dimensions": [
+        "date"
+      ],
+      "metrics": [
+        {
+          "api_name": "organicGoogleSearchImpressions"
+        }
+      ],
+      "aggregate_metrics": [
+        {
+          "api_name": "organicGoogleSearchImpressions",
+          "scorecard_column": "GA4 Search Impressions"
+        }
+      ]
+    }
+  ]
+}

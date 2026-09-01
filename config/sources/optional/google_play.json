@@ -1,0 +1,52 @@
+{
+  "auth_mode": "service_account",
+  "oauth": {
+    "client_secret_file": "config/secrets/google_oauth_client_secret.json",
+    "token_file": "config/state/google_play_oauth_token.json"
+  },
+  "service_account_file": "config/secrets/google_service_account.json",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "google_play": {
+    "enabled": true,
+    "bucket_id": "pubsite_prod_7690984623162798542",
+    "package_name": "com.smemedia.android",
+    "report_object_template": "stats/installs/installs_{package_name}_{year_month}_country.csv",
+    "encoding": "utf-16",
+    "metric_column": "Daily User Installs",
+    "sheet": "SME Media Data",
+    "date_column": "Month",
+    "date_grain": "month",
+    "scorecard_column": "Monthly App Downloads"
+  },
+  "app_store": {
+    "enabled": true,
+    "key_type": "team",
+    "private_key_file": "config/secrets/AuthKey_WVG978J68Z.p8",
+    "key_id": "WVG978J68Z",
+    "issuer_id": "69a6de70-6d10-47e3-e053-5b8c7c11a4d1",
+    "vendor_number": "85083172",
+    "frequency": "MONTHLY",
+    "report_subtype": "SUMMARY",
+    "report_type": "SALES",
+    "version": "1_0",
+    "encoding": "utf-8-sig",
+    "units_column": "Units",
+    "product_type_identifiers": [
+      "1",
+      "1F",
+      "1T"
+    ],
+    "skus": [
+      "com.smemedia.ios"
+    ],
+    "apple_ids": [
+      "6494275046"
+    ],
+    "sheet": "SME Media Data",
+    "date_column": "Month",
+    "date_grain": "month",
+    "scorecard_column": "Monthly App Downloads"
+  }
+}

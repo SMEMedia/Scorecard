@@ -13,22 +13,6 @@ COMMANDS = {
         "scripts.commands.run_weekly_scorecard",
         "Update the weekly Google Scorecard.",
     ),
-    "monthly-sources": (
-        "scripts.commands.run_monthly_sources",
-        "Fetch monthly sources without writing the Scorecard.",
-    ),
-    "weekly-sources": (
-        "scripts.commands.run_weekly_sources",
-        "Fetch weekly sources without writing the Scorecard.",
-    ),
-    "compare": (
-        "scripts.tools.compare_scorecards",
-        "Compare Excel sources with Google Sheets and update Discrepancies.",
-    ),
-    "ga4-monthly": (
-        "scripts.commands.write_ga4_monthly",
-        "Run the GA4-only monthly writer.",
-    ),
 }
 
 

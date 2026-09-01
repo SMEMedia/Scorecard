@@ -1,0 +1,59 @@
+{
+  "private_app_token_file": "config/secrets/hubspot_private_app_token.txt",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "reports": [
+    {
+      "name": "monthly_email_metrics",
+      "description": "Monthly SME Media Data columns AI-AP for HubSpot email metrics.",
+      "enabled": true,
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "columns": {
+        "subscribers": "Email Subscribers",
+        "delivered": "Emails Delivered",
+        "opens": "Email Opens",
+        "open_rate": "Email Open Rate",
+        "clicks": "Email Clicks",
+        "click_rate": "Email CTR",
+        "click_to_open_rate": "Email Click to Open Rate"
+      },
+      "histogram": {
+        "endpoint": "/marketing/emails/2026-03/statistics/histogram",
+        "interval": "MONTH",
+        "counter_map": {
+          "selected": "Email Subscribers",
+          "delivered": "Emails Delivered",
+          "open": "Email Opens",
+          "click": "Email Clicks"
+        },
+        "ratio_map": {
+          "openratio": "Email Open Rate",
+          "clickratio": "Email CTR",
+          "clicktoopenratio": "Email Click to Open Rate"
+        }
+      },
+      "subscriber_list": {
+        "list_id": "274",
+        "scorecard_column": "Email Subscribers"
+      },
+      "email_folder": {
+        "folder_name_template": "{month_name} {year}",
+        "exclude_name_contains": [
+          "(Clone)"
+        ],
+        "only_sent": true,
+        "date_must_match_report_range": true,
+        "counter_map": {
+          "delivered": "Emails Delivered"
+        },
+        "event_map": {
+          "OPEN": "Email Opens",
+          "CLICK": "Email Clicks"
+        }
+      }
+    }
+  ]
+}

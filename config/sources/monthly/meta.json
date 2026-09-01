@@ -1,0 +1,27 @@
+{
+  "api_base_url": "https://graph.facebook.com",
+  "api_version": "v21.0",
+  "secrets_file": "config/secrets/meta.toml",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "sheet": "SME Media Data",
+  "date_column": "Month",
+  "facebook_page": {
+    "enabled": true,
+    "mode": "current_snapshot",
+    "page_id": "236848863052575",
+    "token_section": "meta",
+    "token_key": "page_access_token",
+    "scorecard_column": "Facebook Followers"
+  },
+  "instagram_business": {
+    "enabled": true,
+    "mode": "current_snapshot",
+    "ig_user_id": "17841473898581198",
+    "api_base_url": "https://graph.instagram.com",
+    "token_section": "instagram",
+    "token_key": "access_token",
+    "scorecard_column": "Instagram Followers"
+  }
+}

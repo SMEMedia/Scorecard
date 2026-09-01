@@ -1,0 +1,74 @@
+{
+  "auth_mode": "oauth",
+  "oauth": {
+    "client_secret_file": "config/secrets/google_oauth_client_secret.json",
+    "token_file": "config/state/youtube_oauth_token.json"
+  },
+  "service_account_file": "config/secrets/google_service_account.json",
+  "subscriber_snapshot_file": "config/state/youtube_subscribers.json",
+  "default_date_range": {
+    "mode": "latest_completed_month"
+  },
+  "reports": [
+    {
+      "name": "monthly_channel_engagement",
+      "enabled": true,
+      "type": "analytics",
+      "ids": "channel==MINE",
+      "metrics": [
+        "views",
+        "estimatedMinutesWatched",
+        "averageViewDuration"
+      ],
+      "sheet": "SME Media Engagement Metrics",
+      "date_column": "Month",
+      "date_grain": "month",
+      "scorecard_metrics": [
+        {
+          "api_metric": "views",
+          "scorecard_column": "Videos Views*"
+        },
+        {
+          "api_metric": "averageViewDuration",
+          "scorecard_column": "Avg. View Duration*",
+          "transform": "seconds_to_mmss_time"
+        },
+        {
+          "api_metric": "estimatedMinutesWatched",
+          "scorecard_column": "Watch Time (Hours)*",
+          "transform": "minutes_to_hours"
+        }
+      ]
+    },
+    {
+      "name": "monthly_channel_subscribers",
+      "enabled": true,
+      "type": "subscribers",
+      "mine": true,
+      "use_snapshot": true,
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "scorecard_column": "YouTube Subscribers"
+    },
+    {
+      "name": "monthly_podcast_plays",
+      "enabled": true,
+      "type": "analytics",
+      "ids": "channel==MINE",
+      "playlist_id": "PLEMmsgg0GMzCJZnBjaIyMBUPVx9hT0Ft0",
+      "metrics": [
+        "views"
+      ],
+      "sheet": "SME Media Data",
+      "date_column": "Month",
+      "date_grain": "month",
+      "scorecard_metrics": [
+        {
+          "api_metric": "views",
+          "scorecard_column": "YouTube Podcast Plays"
+        }
+      ]
+    }
+  ]
+}

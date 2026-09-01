@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from datetime import date
 from pathlib import Path
@@ -20,6 +21,7 @@ from scripts.lib.google_sheets_data import (  # noqa: E402
     make_credentials,
     make_credentials_from_info,
 )
+from scripts.lib.runtime_secrets import materialize_streamlit_secrets  # noqa: E402
 
 
 DEFAULT_CONFIG = PROJECT_ROOT / "config" / "scorecard.json"
@@ -83,6 +85,63 @@ LINKEDIN_PERFORMANCE_METRICS = [
     "LinkedIn Engagement Rate (Paid)",
     "LinkedIn Posts",
 ]
+
+
+def render_update_page() -> None:
+    st.title("Update the scorecard")
+    st.write(
+        "Choose which scorecard to refresh. The update collects the latest completed "
+        "reporting period and writes it to the shared Google Sheet."
+    )
+    cadence = st.radio(
+        "Which scorecard do you want to update?",
+        ["Weekly", "Monthly"],
+        horizontal=True,
+    )
+    st.info(
+        "Weekly uses the latest completed Saturday. Monthly uses the latest completed month."
+    )
+    preview = st.checkbox(
+        "Preview only (do not save changes)",
+        value=True,
+        help="Recommended for the first run. You can review the planned changes before saving.",
+    )
+    confirmed = preview or st.checkbox(
+        "I understand this will update the shared scorecard",
+        value=False,
+    )
+    label = "Preview update" if preview else "Update scorecard now"
+    if st.button(label, type="primary", disabled=not confirmed, use_container_width=True):
+        try:
+            materialize_streamlit_secrets(st.secrets)
+            command = [sys.executable, str(PROJECT_ROOT / "scorecard.py"), cadence.lower()]
+            if preview:
+                command.append("--dry-run")
+            with st.spinner("Collecting data. This can take several minutes..."):
+                result = subprocess.run(
+                    command,
+                    cwd=PROJECT_ROOT,
+                    capture_output=True,
+                    text=True,
+                    timeout=600,
+                    check=False,
+                )
+        except subprocess.TimeoutExpired:
+            st.error("The update took longer than 10 minutes and was stopped. Please contact the scorecard administrator.")
+            return
+        except Exception as exc:
+            st.error(f"The update could not start: {exc}")
+            return
+
+        output = "\n".join(part for part in (result.stdout, result.stderr) if part).strip()
+        if result.returncode == 0:
+            st.success("Preview finished." if preview else "Scorecard update finished.")
+            if not preview:
+                load_scorecard.clear()
+        else:
+            st.error("The update did not finish successfully. Share the details below with the scorecard administrator.")
+        with st.expander("Update details", expanded=result.returncode != 0):
+            st.code(output or "No details were returned.", language="text")
 
 
 def _secret(name: str, default: Any = None) -> Any:
@@ -277,6 +336,15 @@ def _render_supporting_tab(frame: pd.DataFrame, title: str) -> None:
 
 def main() -> None:
     st.set_page_config(page_title="Media Performance Scorecard", page_icon="📊", layout="wide")
+
+    page = st.sidebar.radio(
+        "Go to",
+        ["View dashboard", "Update scorecard"],
+        help="Use Update scorecard when new weekly or monthly data is ready.",
+    )
+    if page == "Update scorecard":
+        render_update_page()
+        return
     st.markdown(
         """
         <style>
