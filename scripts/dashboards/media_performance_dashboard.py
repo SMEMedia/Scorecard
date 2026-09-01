@@ -119,8 +119,15 @@ def _youtube_web_oauth_settings() -> tuple[dict[str, Any], str]:
     return dict(client), redirect_uri
 
 
-def _youtube_oauth_state(client_secret: str) -> str:
-    payload = f"{int(time.time())}.{secrets.token_urlsafe(24)}"
+def _youtube_oauth_state(client_secret: str, code_verifier: str) -> str:
+    payload = json.dumps(
+        {
+            "created_at": int(time.time()),
+            "nonce": secrets.token_urlsafe(24),
+            "code_verifier": code_verifier,
+        },
+        separators=(",", ":"),
+    )
     encoded = base64.urlsafe_b64encode(payload.encode()).decode().rstrip("=")
     signature = hmac.new(
         client_secret.encode(), encoded.encode(), hashlib.sha256
@@ -128,20 +135,25 @@ def _youtube_oauth_state(client_secret: str) -> str:
     return f"{encoded}.{signature}"
 
 
-def _valid_youtube_oauth_state(state: str, client_secret: str) -> bool:
+def _youtube_oauth_code_verifier(state: str, client_secret: str) -> str | None:
     try:
         encoded, signature = state.rsplit(".", 1)
         expected = hmac.new(
             client_secret.encode(), encoded.encode(), hashlib.sha256
         ).hexdigest()
         if not hmac.compare_digest(signature, expected):
-            return False
+            return None
         padding = "=" * (-len(encoded) % 4)
-        payload = base64.urlsafe_b64decode(encoded + padding).decode()
-        created_at = int(payload.split(".", 1)[0])
-        return 0 <= time.time() - created_at <= 900
-    except (binascii.Error, ValueError, TypeError, UnicodeDecodeError):
-        return False
+        payload = json.loads(base64.urlsafe_b64decode(encoded + padding).decode())
+        created_at = int(payload["created_at"])
+        code_verifier = str(payload["code_verifier"])
+        if not 0 <= time.time() - created_at <= 900:
+            return None
+        if not 43 <= len(code_verifier) <= 128:
+            return None
+        return code_verifier
+    except (binascii.Error, KeyError, ValueError, TypeError, UnicodeDecodeError):
+        return None
 
 
 def render_youtube_reconnect_page() -> None:
@@ -171,7 +183,12 @@ def render_youtube_reconnect_page() -> None:
 
     if code:
         client_secret = str(client.get("client_secret", ""))
-        if not returned_state or not _valid_youtube_oauth_state(returned_state, client_secret):
+        code_verifier = (
+            _youtube_oauth_code_verifier(returned_state, client_secret)
+            if returned_state
+            else None
+        )
+        if not code_verifier:
             st.error("The authorization session could not be verified. Start the YouTube sign-in again.")
             st.query_params.clear()
             return
@@ -180,11 +197,14 @@ def render_youtube_reconnect_page() -> None:
                 {"web": client},
                 scopes=YOUTUBE_SCOPES,
                 state=returned_state,
+                autogenerate_code_verifier=False,
             )
             flow.redirect_uri = redirect_uri
+            flow.code_verifier = code_verifier
             flow.fetch_token(code=code)
             token_values = json.loads(flow.credentials.to_json())
         except Exception as exc:
+            st.query_params.clear()
             st.error(f"Google returned authorization, but the new token could not be created: {exc}")
             return
         st.query_params.clear()
@@ -207,9 +227,17 @@ def render_youtube_reconnect_page() -> None:
     if st.button("Start YouTube sign-in", type="primary", use_container_width=True):
         token_path = PROJECT_ROOT / "config" / "state" / "youtube_oauth_token.json"
         token_path.unlink(missing_ok=True)
-        flow = Flow.from_client_config({"web": client}, scopes=YOUTUBE_SCOPES)
+        flow = Flow.from_client_config(
+            {"web": client},
+            scopes=YOUTUBE_SCOPES,
+            autogenerate_code_verifier=False,
+        )
         flow.redirect_uri = redirect_uri
-        state = _youtube_oauth_state(str(client.get("client_secret", "")))
+        code_verifier = secrets.token_urlsafe(64)
+        flow.code_verifier = code_verifier
+        state = _youtube_oauth_state(
+            str(client.get("client_secret", "")), code_verifier
+        )
         authorization_url, state = flow.authorization_url(
             state=state,
             access_type="offline",
