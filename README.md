@@ -87,6 +87,7 @@ Add only the source credentials used by the organization:
 ```toml
 hubspot_private_app_token = "..."
 x_bearer_token = "..."
+youtube_redirect_uri = "https://YOUR-STREAMLIT-APP.streamlit.app/"
 app_store_private_key = """-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----
@@ -97,6 +98,15 @@ app_store_private_key = """-----BEGIN PRIVATE KEY-----
 
 [youtube_oauth_token]
 # Copy the complete authorized-user token JSON here.
+
+[youtube_web_oauth_client]
+client_id = "...apps.googleusercontent.com"
+project_id = "..."
+auth_uri = "https://accounts.google.com/o/oauth2/auth"
+token_uri = "https://oauth2.googleapis.com/token"
+auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+client_secret = "..."
+redirect_uris = ["https://YOUR-STREAMLIT-APP.streamlit.app/"]
 
 [meta]
 page_access_token = "..."
@@ -116,6 +126,28 @@ python scripts/sources/youtube.py --authorize
 ```
 
 If this happens every seven days, check the Google Cloud OAuth app's **Audience / Publishing status**. External OAuth apps left in **Testing** receive refresh tokens that expire after seven days. Move the app to **In production**, use an **Internal** app for eligible Workspace users, or have the Workspace administrator mark the app trusted, as appropriate for SME policy. Reauthorize once after changing that setting.
+
+### Set up YouTube reconnection
+
+The Streamlit **Reconnect YouTube** screen requires a one-time web OAuth client setup:
+
+1. In Google Cloud Console, open the same project used for the YouTube APIs.
+2. Go to **Google Auth Platform → Clients** and choose **Create client**.
+3. Choose **Web application**. This is separate from the existing Desktop client.
+4. Under **Authorized redirect URIs**, enter the exact public Streamlit app URL, including its final slash, such as `https://YOUR-STREAMLIT-APP.streamlit.app/`.
+5. Download or open the client details. Copy the fields inside its `web` object into `[youtube_web_oauth_client]` in Streamlit Secrets.
+6. Set the top-level `youtube_redirect_uri` to that exact same Streamlit URL and save Secrets.
+
+When YouTube fails during an update:
+
+1. Choose **Reconnect YouTube** in the app's left menu.
+2. Select **Start YouTube sign-in**, then **Continue to Google**.
+3. Sign in with the channel owner/manager account and approve access.
+4. After Google returns to Streamlit, copy the generated `[youtube_oauth_token]` block.
+5. In Streamlit app settings, open **Secrets**, replace the old token section, save, and wait for the app to restart.
+6. Run a preview update.
+
+The app deletes only its temporary runtime copy of the old token. Streamlit does not allow an application to rewrite its own saved Secrets, so the final copy-and-save step is required.
 
 ### Source access checklist
 

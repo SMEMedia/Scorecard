@@ -119,16 +119,19 @@ def make_oauth_credentials(config: dict[str, Any]) -> Credentials:
             try:
                 credentials.refresh(GoogleAuthRequest())
             except RefreshError as error:
+                token_file.unlink(missing_ok=True)
                 raise ConfigError(
                     "The YouTube authorization has expired or was revoked. "
                     "An administrator must authorize YouTube again locally and replace "
                     "the youtube_oauth_token value in Streamlit Secrets. If this recurs "
-                    "every seven days, move the Google OAuth app out of Testing status."
+                    "every seven days, use Reconnect YouTube in the Streamlit app's left "
+                    "menu, then replace the token block in Streamlit Secrets."
                 ) from error
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                oauth_client_secret_file(config),
-                scopes=SCOPES,
+            raise ConfigError(
+                "YouTube authorization is missing or does not include the required scopes. "
+                "Use Reconnect YouTube in the Streamlit app's left menu, then replace "
+                "the token block in Streamlit Secrets."
             )
             credentials = flow.run_local_server(port=0)
 
