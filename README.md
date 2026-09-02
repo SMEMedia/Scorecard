@@ -1,181 +1,87 @@
-# SME Media Scorecard
+# SME Media Automated Scorecard
 
-This app displays the SME Media performance dashboard and updates the shared weekly and monthly scorecards. Day-to-day users do not need Python, GitHub, or any other software installed.
+This dashboard displays SME Media performance and updates the shared weekly and monthly scorecards. It is intended for routine use in a web browser.
 
-## For scorecard users
+## Important links
 
-Open the hosted Streamlit app in your web browser.
+- [Open the Automated Scorecard](https://smescorecard.streamlit.app/)
+- [Shared Scorecard](https://docs.google.com/spreadsheets/d/1byunytq2svgs56Sp4xwogYEhQOAv2xHw5HTELfzBRi4/edit)
+- [SMEMedia repository](https://github.com/SMEMedia/Scorecard)
 
-### View the dashboard
+## View the dashboard
 
-1. Choose **View dashboard** in the left menu.
+1. Open the app and choose **View dashboard**.
 2. Choose **Monthly** or **Weekly**.
 3. Use the date and metric controls to explore results.
 
-### Update a scorecard
+## Update the scorecard
 
-1. Choose **Update scorecard** in the left menu.
-2. Choose **Weekly** or **Monthly**.
-3. Optional: In Libsyn, download **Total Downloads** for **Last 90 Days** as CSV and drag it into the upload box. If omitted, podcast downloads are skipped.
-4. Leave **Preview only** checked and select **Preview update**.
-5. Open **Update details** and review the planned changes.
-6. If the preview looks correct, clear **Preview only**.
-7. Check the confirmation box and select **Update scorecard now**.
-8. Wait for the green success message before closing the page.
+1. Choose **Update scorecard**, then **Weekly** or **Monthly**.
+2. If podcast downloads are needed, download Libsyn **Total Downloads** for **Last 90 Days** as a CSV and upload it. If omitted, podcast downloads are skipped.
+3. Leave **Preview only** selected and choose **Preview update**.
+4. Open **Update details** and review every planned change.
+5. If the preview is correct, clear **Preview only**, select the confirmation box, and choose **Update scorecard now**.
+6. Keep the page open until the green success message appears.
 
-The weekly update uses the latest completed Saturday. The monthly update uses the latest completed calendar month. Updates may take several minutes because the app contacts each source system.
+Weekly updates use the latest completed Saturday. Monthly updates use the latest completed calendar month. Formula-owned and manually maintained columns are protected from automatic replacement.
 
-### If something goes wrong
+## Understand the results
 
-Do not repeatedly press the update button. Expand **Update details**, copy the message, and send it to the scorecard administrator with:
+The update collects available information from GA4, Google Search Console, HubSpot, YouTube, Libsyn, app stores, and social platforms. A source may be unavailable while the other sources complete. **Update details** shows the result for each source.
 
-- whether you chose Weekly or Monthly;
-- whether it was a preview or real update;
-- the date and approximate time;
-- a screenshot of the message.
+The first successful saved update for a reporting period creates a snapshot. Later updates may reuse that snapshot so historical results do not change unexpectedly.
 
-The shared scorecard is here: [Google Scorecard](https://docs.google.com/spreadsheets/d/1byunytq2svgs56Sp4xwogYEhQOAv2xHw5HTELfzBRi4/edit).
+## Troubleshooting
 
-## What the update does
+### An update appears to be stuck
 
-The app reads available data from GA4, Google Search Console, HubSpot, YouTube, Libsyn, the app stores, and social platforms. It maps those values to the correct row and column in the shared Google Sheet. Formula-owned and manually maintained columns are not overwritten.
+- Keep the page open; the app contacts several services.
+- Do not select the update button again.
+- If no progress appears after 20 minutes, expand **Update details** and capture the message.
+- Send the reporting frequency, date, time, preview/saved status, and screenshot to support.
 
-The first successful saved run for a reporting period also creates a snapshot. Later runs reuse that snapshot so historical periods do not unexpectedly change.
+### A source is marked unavailable
 
-Some source integrations may report that they are unavailable while the remaining sources complete. The update details identify each source and its status.
+- Review the source-specific message under **Update details**.
+- Confirm the reporting period is valid and try one new preview.
+- If the same source fails again, contact the owner of that system. Other successful sources do not need to be rerun repeatedly.
 
-## For the scorecard administrator
+### YouTube authorization expired
 
-The rest of this README is for the person who owns the GitHub repository, Streamlit deployment, and source credentials.
-
-### Deploy on Streamlit Community Cloud
-
-1. Connect the GitHub repository to Streamlit Community Cloud.
-2. Set the app file to `scripts/dashboards/media_performance_dashboard.py`.
-3. Add the credentials described below in the app's **Secrets** settings.
-4. Deploy the app and run a Weekly and Monthly preview.
-5. Restrict app access to the intended SME users before enabling routine updates.
-
-Never commit credentials to GitHub. Files under `config/secrets/` and `config/state/` are intentionally ignored.
-
-### Streamlit secrets
-
-The Google service account is required for both the dashboard and Google Sheet writes:
-
-```toml
-spreadsheet_id = "1byunytq2svgs56Sp4xwogYEhQOAv2xHw5HTELfzBRi4"
-
-[google_service_account]
-type = "service_account"
-project_id = "..."
-private_key_id = "..."
-private_key = """-----BEGIN PRIVATE KEY-----
-...
------END PRIVATE KEY-----
-"""
-client_email = "..."
-client_id = "..."
-auth_uri = "https://accounts.google.com/o/oauth2/auth"
-token_uri = "https://oauth2.googleapis.com/token"
-auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
-client_x509_cert_url = "..."
-universe_domain = "googleapis.com"
-```
-
-Add only the source credentials used by the organization:
-
-```toml
-hubspot_private_app_token = "..."
-x_bearer_token = "..."
-youtube_redirect_uri = "https://YOUR-STREAMLIT-APP.streamlit.app/"
-app_store_private_key = """-----BEGIN PRIVATE KEY-----
-...
------END PRIVATE KEY-----
-"""
-
-[google_oauth_client_secret]
-# Copy the complete contents of the Google OAuth client JSON here.
-
-[youtube_oauth_token]
-# Copy the complete authorized-user token JSON here.
-
-[youtube_web_oauth_client]
-client_id = "...apps.googleusercontent.com"
-project_id = "..."
-auth_uri = "https://accounts.google.com/o/oauth2/auth"
-token_uri = "https://oauth2.googleapis.com/token"
-auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
-client_secret = "..."
-redirect_uris = ["https://YOUR-STREAMLIT-APP.streamlit.app/"]
-
-[meta]
-page_access_token = "..."
-
-[instagram]
-access_token = "..."
-```
-
-The app converts these settings into temporary, ignored files expected by the existing source integrations. OAuth tokens must already be authorized; a hosted browser cannot complete a local OAuth consent flow.
-
-Libsyn credentials are not stored in Streamlit. The operator manually downloads and uploads the report for each run.
-
-### Refresh the YouTube key
-
-When an update says that YouTube authorization expired or was revoked:
-
-1. Choose **Reconnect YouTube** in the app's left menu.
+1. Choose **Reconnect YouTube**.
 2. Select **Start YouTube sign-in**, then **Continue to Google**.
-3. Sign in with the channel owner/manager account and approve access.
-4. After Google returns to Streamlit, copy the generated `[youtube_oauth_token]` block.
-5. In Streamlit app settings, open **Secrets**, replace the old token section, save, and wait for the app to restart.
+3. Sign in with an account that manages the SME Media YouTube channel.
+4. Approve the requested read-only access.
+5. Follow the on-screen instructions for saving the refreshed authorization in Streamlit.
 6. Run a preview update.
 
-The app deletes only its temporary runtime copy of the old token. Streamlit does not allow an application to rewrite its own saved Secrets, so the final copy-and-save step is required.
+If you cannot access Streamlit settings, send the generated authorization block securely to the assigned Streamlit owner. Do not place it in GitHub, email, tickets, or chat.
 
-### Source access checklist
+### Podcast downloads are missing
 
-- The Google service account can edit the Scorecard Google Sheet.
-- The same account can read GA4 property `432233519` and the Search Console property.
-- The HubSpot private app has the scopes required by its configured email endpoints.
-- The YouTube OAuth token includes YouTube Data read-only and YouTube Analytics read-only scopes.
-- App Store Connect and Google Play credentials can read the configured reports.
-- Meta, Instagram, and X credentials are current.
+- Confirm the Libsyn file covers **Last 90 Days** and is a CSV.
+- Confirm it was uploaded before running the preview.
+- Review **Update details** for the Libsyn result.
 
-Run both previews after changing any credential.
+### Values do not match another report
 
-### Local administrator use
+- Confirm both reports use the same reporting period.
+- Check whether the source system finalized recent information after the scorecard snapshot was created.
+- Do not overwrite a historical snapshot without approval from the scorecard owner.
+- Record the metric, period, expected value, displayed value, and source report before escalating.
 
-Technical administrators can still run the app or automation locally:
+### The shared Sheet was not updated
 
-```powershell
-python -m pip install -r requirements.txt
-streamlit run scripts/dashboards/media_performance_dashboard.py
+- Confirm **Preview only** was cleared.
+- Confirm the confirmation box was selected.
+- Look for the green saved-update message.
+- If a permissions message appears, ask the Google Workspace owner to confirm that the dashboard account can edit the shared Scorecard.
 
-python scorecard.py weekly --dry-run
-python scorecard.py weekly
-python scorecard.py monthly --dry-run
-python scorecard.py monthly
-```
+## Ongoing maintenance
 
-Local credentials belong in `config/secrets/`. Runtime tokens and snapshots belong in `config/state/`.
+- Always preview before saving.
+- Keep the Streamlit app restricted to approved SME users because it can update the shared Scorecard.
+- Keep source-system and Streamlit ownership assigned to current SME staff.
+- Escalate credential rotation, snapshot corrections, permissions, and deployment errors to the assigned technical owner.
 
-### Project layout
-
-```text
-scorecard.py                 Command-line entry point for administrators
-config/scorecard.json        Shared Google Sheet settings
-config/sources/              Source mappings and reporting rules
-scripts/commands/            Weekly and monthly update commands
-scripts/dashboards/          Streamlit dashboard and update interface
-scripts/lib/                 Google Sheets and runtime-secret helpers
-scripts/pipelines/           Rules that protect formula/manual columns
-scripts/sources/             Source-system integrations and required helpers
-```
-
-### Security and maintenance
-
-- Rotate a credential immediately if it appears in Git, email, chat, or screenshots.
-- Review source account ownership before an employee leaves.
-- Keep the Streamlit app private because it can write to the shared scorecard.
-- Use preview before every routine saved update.
-- Keep snapshots in mind when correcting a previously captured reporting period; snapshot refresh is an administrator-only operation.
+*** Delete File: HubSpotDash/README.md
