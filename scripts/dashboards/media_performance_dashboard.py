@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import base64
 import binascii
 import hashlib
@@ -94,6 +95,77 @@ LINKEDIN_PERFORMANCE_METRICS = [
     "LinkedIn Engagement Rate (Paid)",
     "LinkedIn Posts",
 ]
+
+CHANGE_LINE_PATTERN = re.compile(
+    r"^\s+(?P<sheet>.+?) \[(?P<period>[^|]+?) \| (?P<metric>.+?)\]: "
+    r"(?P<current>.+?) -> (?P<automated>.+)$"
+)
+
+
+def _display_change_value(metric: str, raw: str) -> str:
+    """Turn the command's repr-formatted value into a friendlier display value."""
+    try:
+        value = ast.literal_eval(raw)
+    except (SyntaxError, ValueError):
+        return raw
+    if value in (None, ""):
+        return "—"
+    if isinstance(value, (int, float)):
+        if "Rate" in metric or metric.endswith("CTR"):
+            return f"{value:.1%}"
+        if "Revenue" in metric or metric == "Rev / IO":
+            return f"${value:,.2f}"
+        return f"{value:,}"
+    return str(value)
+
+
+def parse_planned_changes(output: str) -> pd.DataFrame:
+    """Extract Google Sheet changes from scorecard command output."""
+    changes = []
+    for line in output.splitlines():
+        match = CHANGE_LINE_PATTERN.match(line)
+        if not match:
+            continue
+        values = match.groupdict()
+        changes.append(
+            {
+                "Period": values["period"].strip(),
+                "Metric": values["metric"].strip(),
+                "Current value": _display_change_value(
+                    values["metric"], values["current"].strip()
+                ),
+                "Automated value": _display_change_value(
+                    values["metric"], values["automated"].strip()
+                ),
+                "Sheet": values["sheet"].strip(),
+            }
+        )
+    return pd.DataFrame(changes)
+
+
+def render_preview_changes(output: str) -> None:
+    changes = parse_planned_changes(output)
+    st.subheader("Automated values")
+    if changes.empty:
+        st.info("No automated value changes were found for this preview.")
+        return
+    st.caption(
+        f"{len(changes)} value{'s' if len(changes) != 1 else ''} would be written. "
+        "Nothing has been saved yet."
+    )
+    st.dataframe(
+        changes,
+        hide_index=True,
+        use_container_width=True,
+        column_order=["Period", "Metric", "Current value", "Automated value", "Sheet"],
+        column_config={
+            "Period": st.column_config.TextColumn(width="small"),
+            "Metric": st.column_config.TextColumn(width="large"),
+            "Current value": st.column_config.TextColumn(width="medium"),
+            "Automated value": st.column_config.TextColumn(width="medium"),
+            "Sheet": st.column_config.TextColumn(width="medium"),
+        },
+    )
 
 
 def _toml_table(name: str, values: dict[str, Any]) -> str:
@@ -267,6 +339,11 @@ def render_update_page() -> None:
     st.info(
         "Weekly uses the latest completed Saturday. Monthly uses the latest completed month."
     )
+    if cadence == "Weekly":
+        st.caption(
+            "App Store Connect and Google Play are monthly sources. Select Monthly to preview "
+            "or update app-download values."
+        )
     st.subheader("Libsyn report")
     st.write(
         "In Libsyn, download the Total Downloads report for **Last 90 Days** as CSV, "
@@ -329,6 +406,8 @@ def render_update_page() -> None:
                 load_scorecard.clear()
         else:
             st.error("The update did not finish successfully. Share the details below with the scorecard administrator.")
+        if preview and result.returncode == 0:
+            render_preview_changes(output)
         with st.expander("Update details", expanded=result.returncode != 0):
             st.code(output or "No details were returned.", language="text")
 
